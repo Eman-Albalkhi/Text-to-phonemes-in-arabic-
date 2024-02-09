@@ -8,12 +8,21 @@ Several test cases were built based on the reading rules mentioned in the theore
 
 It was found that the Toph system provides the highest accuracy among these systems, with an accuracy of 90.003%. The Toph system was adopted and some of its existing rules were modified to fit the recitation of Quranic verses, as it considers sequential reading, which is one of the most important requirements for reciting Quranic verses. It also takes into account special cases such as certain Quranic words and cases of stopping on a consonant or an Alef depending on the end of the word. After the modification, an accuracy of approximately 94% was achieved. Additionally, this system is built using the C++ programming language, so it was linked with Python and a suitable interface was developed.
 
+----
+The TOPH system involves converting written symbols into phonetic symbols based on rules stored in the computer. It converts text from its written or spelled form into its corresponding spoken or pronounced form using language-specific algorithms. It should be noted that the input to the program is entirely in a coded format.
+
 The modified rules are as follows:
 
-1. The case of hamzat al-wasl (connecting hamza) was taken into consideration.
-2. The diacritical marks such as damma and kasra were omitted due to their non-compliance with the rules of Tajweed.
-3. The letter "raa" (ر) was emphasized with shadda (gemination).
-4. The gemination of the letters "waw" (و) and "yaa" (ي) was omitted according to the rules of Tajweed, while maintaining the gemination of diacritical marks in their appropriate positions.
-5. The vocalization of numbers was omitted as it is not needed during recitation.
-6. The letters "khaa" (خ), "ghayn" (غ), and "qaaf" (ق) were added as letters of isti'laa (raising).
-7. The letter "alif" (أ) and the diacritical marks after the emphatic "raa" (ر) were emphasized.
+The modified rules are as follows:
+
+1. Consideration of the case of hamzat al-wasl (connecting hamza) being maddoomah (closed) or maktuubah (open) based on the movement of the third word.
+2. Omission of diacritical marks (damma, kasra) due to their non-compliance with the rules of Tajweed.
+3. Consideration of additional cases for emphasizing the letter "raa" (ر).
+4. Omission of the gemination of "waw" (و) and "yaa" (ي) according to the adopted rules of Tajweed, while maintaining the gemination of diacritical marks in their appropriate positions.
+5. Omission of vocalization of numbers as they are not needed during recitation.
+6. Addition of the letters "khaa" (خ), "ghayn" (غ), and "qaaf" (ق) as letters of isti'laa (raising).
+7. Consideration of emphasizing the letter "alif" (أ) and the diacritical marks after the emphatic "raa" (ر).
+8. Consideration of emphasizing the letter "alif" (أ) and the diacritical marks after the letters of isti'laa and the emphatic letters of isti'laa.
+9. Consideration of words in which the letter of elongation (madd) is written but not pronounced.
+10. Consideration of the gemination and softening of the letter "lam" (ل) in the pronunciation of the Divine Name.
+11. Consideration of "waw" (و) and "yaa" (ي) in all their cases.
