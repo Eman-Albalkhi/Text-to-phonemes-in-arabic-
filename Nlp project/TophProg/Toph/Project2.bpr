@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="Project2.exe"/>
+    <OBJFILES value="Project2.obj structure1.obj"/>
+    <RESFILES value=""/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <SPARELIBS value=""/>
+    <PACKAGES value="vcl50.bpi vclx50.bpi bcbsmp50.bpi qrpt50.bpi vcldb50.bpi vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi teeui50.bpi teedb50.bpi tee50.bpi nmfast50.bpi 
+      dclocx50.bpi"/>
+    <PATHCPP value=".;"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="ilink32"/>
+    <USERDEFINES value=""/>
+    <SYSDEFINES value="_NO_VCL;_VIS_NOLIB"/>
+    <MAINSOURCE value="Project2.cpp"/>
+    <INCLUDEPATH value="$(BCB)\include;..\inc;..\src"/>
+    <LIBPATH value="$(BCB)\lib"/>
+    <WARNINGS value=""/>
+    <WARNOPTSTR value=""/>
+  </MACROS>
+  <OPTIONS>
+    <IDLCFLAGS value="-src_suffix cpp -I$(BCB)\include -I..\inc -I..\src -boa"/>
+    <CFLAG1 value="-Od -w- -Tkh30000 -X- -r- -a8 -b -k -y -v -vi- -c -tWM -tWC"/>
+    <PFLAGS value="-$YD -$W -$O- -v -JPHN -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="-D&quot;&quot; -ap -Tpe -x -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0x32.obj $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) import32.lib cw32mt.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1025
+CodePage=1256
+
+[Version Info Keys]
+CompanyName=
+FileDescription=Executable (Console)
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=1
+Item0=$(BCB)\include;E:\My_project\toparab2\inc;E:\My_project\toparab2\src
+
+[HistoryLists\hlLibraryPath]
+Count=1
+Item0=$(BCB)\lib
+
+[Debugging]
+DebugSourceDirs=
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=1
+LinkCGLIB=0
+
+[CORBA]
+AddServerUnit=1
+AddClientUnit=1
+PrecompiledHeaders=1
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

@@ -1,0 +1,117 @@
+// Program Name :  init.p
+
+#include "init.h"
+#include "trans.h"
+//#include <stdio.h>
+
+void ini_ident(ifstream &fens)
+{
+  int i;
+  fens>>indtid;
+  car=fens.get();
+        cout<< endl<<"indtid="<<indtid<<endl;
+        cout<< "tid[]=";
+  for (i = 1; i <= indtid; i++) //must be read from 1
+{
+     fens>>tid[i];
+     cout<<'\n'<<tid[i];
+     }
+     cout<<endl;
+     car=fens.get();
+    fens>>indtadid;
+    car=fens.get();
+    cout<<'\n'<<"indtadid ="<< indtadid<<endl;
+  for (i = 1; i <= indtadid; i++)
+  {
+        fens>>tadid[i].adr;
+        car=fens.get();
+             cout<<'\n'<<tadid[i].adr;
+        fens>>tadid[i].lg;
+        car=fens.get();
+             cout<<'\n'<<tadid[i].lg;
+  }
+}
+
+
+
+/*void ini_elem1(ifstream &fens)
+{	if (ptel==NULL)
+	{
+		maillon1=new tab_elem;
+		ptel=maillon1;
+		maillon1->tab1=fens.get();
+		maillon1->suivant=NULL;
+	}
+	else
+	{
+		maillon2=maillon1;
+                maillon1=new tab_elem;
+		maillon2->suivant=maillon1;
+		maillon1->tab1=fens.get();
+		maillon1->suivant=NULL;
+	}
+}
+
+*/
+
+void ini_elem(ifstream &fens)
+{
+  int i;
+
+ ptel =(tab_elem*) new tab_elem;
+  fens>> indtel;
+ fens.get(car);
+  for (i = 1; i <= indtel; i++)
+   { car=fens.get();
+   (*ptel)[i]=car;
+
+    //fens>>(((ptel)+(sizeof char)*(i-1))*);
+   cout<<(*ptel)[i];
+   }
+//   ini_elem1(fens);
+   car=fens.get();
+ fens>>indtadel;// endl
+  car=fens.get();
+  for (i = 1; i <= indtadel ; i++)
+  {
+    fens>> tadel[i].adr;
+    car=fens.get();
+    fens>> tadel[i].lg;//endl
+    car=fens.get();
+  }
+}
+
+
+void ini_ens(ifstream &fens)
+{
+  int i;
+  list_appart* p;
+
+  fens >>indtadid; //endl
+  car=fens.get();
+  for (i = 0; i <= indtadid; i++)
+  {
+    if (fens.get()=='\n')
+      tens[i] = NULL;
+    else
+	{
+        fens.unget();
+      (list_appart*) (tens[i]) = new list_appart;
+      p = tens[i];
+      fens>> p->num ;//||by using >>
+      car=fens.get();
+	  while (car != '\n')
+	  {
+        p->suivant=new list_appart;
+	p = p->suivant;
+	fens >> p->num ;//endl
+        car=fens.get();
+      }
+      p->suivant = NULL;
+    }
+  }
+}
+
+
+
+/* End. */

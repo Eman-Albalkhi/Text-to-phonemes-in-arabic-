@@ -1,0 +1,1182 @@
+
+
+
+
+#include "types_toph1.h"
+
+#include <iostream.h>
+#include <ostream.h>
+#include <sstream.h>
+#include <iomanip.h>
+#include <fstream.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+using namespace std;
+
+
+#define NEWMODE_SIMPLE  1
+
+ofstream top; //file of struct_regle
+ofstream ftab;
+
+type_tab_long tab_long,tab_dep;
+struc_list* alphabet[256];
+int nbregle;
+
+ofstream fres; //file of text
+char *suff;
+char chemin_gram[20];
+char trace_car;
+int numregle;
+struc_regle regle;
+
+tab_elem *ptr_tab_elem;
+tab_elem *ptel;
+int indtel;
+tab_adr_elem tadel;
+int indtadel;
+nom_elem elcour;
+int numelcour;
+int lgelcour;
+tab_ident tid;
+int indtid;
+tab_adr_ident tadid;
+int indtadid;
+nom_ident idcour;
+int numidcour;
+int lgidcour;
+tab_ens tens;
+bool sens;
+ifstream gram; //file of text
+string u;
+char car;
+
+ofstream res,fens;
+int long_nompref;
+
+ofstream ftrace; //file of text
+
+char rep;
+bool trace;
+list_mot_cxt lmc;
+int imc;
+bool entree_ecran,fin_anormale;
+bool bool_majmin;
+
+void VERIF_LG(int i,int max,int provenance)
+{
+  if (i <= max)
+    return;
+  fres<< "!! erreur : probleme de longueur dans verif_lg\n";
+
+  switch (provenance) {
+
+  case 1:
+    fres<< "Ident. num.trop long"<< (numidcour + 1)<<'\n';
+    break;
+
+  case 2:
+    fres<< "Ens. num. :element trop long"<< (numidcour + 1)<<'\n';
+    break;
+
+  case 3:
+    fres<< "regle num. :contexte trop long"<<numregle<<'\n';
+    break;
+
+  case 4:
+    fres<< "regle num. :chaine a transcrire trop longue"<<numregle<<'\n';
+    break;
+
+  case 5:
+    fres<< "regle num. :chaine de phonemes trop longue"<<numregle<<'\n';
+    break;
+  }
+  fres<<"Longueur max. (fixe par constante) ="<<max<<'\n';
+  fres<< "** FIN ANORMALE **"<<'\n' ;
+  fin_anormale = true;
+  throw 1;
+
+}
+
+void VERIF_CLASSE()
+{
+
+	if (((int)regle.ch_d[0] > last_car_alpha)||((int)regle.ch_d[0] < prim_car_alpha))
+    return;
+  fres<<"!! erreur : probleme sur une classe de r\217gle"<<'\n';
+  fres<<"regle num. : le 1er car. de la ch. a transcrire"<<numregle<<'\n';
+  fres<<"n'appartient pas a la plage de caracteres definie par les "<<'\n';
+  fres<<"cstes PREMIER_CAR_ALPHA et DERNIER_CAR_ALPHA:"<<regle.ch_d[0]<<'\n';
+  fres<<"** FIN ANORMALE **"<<'\n';
+  fin_anormale = true;
+  throw 1;
+}
+
+void LIRE_BLANC()
+{
+        while (!gram.eof() && (car == ' ' || car == '\t'|| car == '\n'))
+	{
+     gram.get(car);
+  }
+}
+
+
+void LIRE_IDENT()
+{
+  lgidcour = 0;
+  char car1=gram.get();
+  while (car1 != '"')
+  {
+    lgidcour++;
+    VERIF_LG(lgidcour,max_lg_ident,1);
+    idcour[lgidcour] = car1;
+    car1=gram.get();
+  }
+  car = gram.get();
+}
+
+
+void LIRE_ELEM()
+{
+  lgelcour = 0;
+  while (car != ' ' && car != ')' && car != '¡') {
+    lgelcour++;
+    VERIF_LG(lgelcour,max_lg_elem, 2);
+    if (car == '/')
+	{
+		car = gram.get();
+    }
+    elcour[lgelcour] = car;
+    car = gram.get();
+  }
+}
+
+
+void LIRE_COMMENTAIRE()
+{
+  while (car == '!') {
+    car = gram.get();
+  }
+  while (car != '!') {
+    car = gram.get();
+  }
+  while (car == '!') {
+    car = gram.get();
+  }
+}
+
+
+void AJ_IDENT()
+{
+  int i;
+  indtadid++;
+  numidcour = indtadid;
+  tadid[numidcour].adr=indtid+1;
+  tadid[numidcour].lg=lgidcour;
+  for (i = 1; i <= lgidcour ; i++)
+  {
+    indtid++;
+    tid[indtid] = idcour[i];
+    //1500          30
+  }
+}
+
+
+
+void AJ_ELEM()
+{
+  int i;
+
+  indtadel++;
+  numelcour = indtadel;
+  tadel[numelcour].adr=indtel+1;
+  tadel[numelcour].lg=lgelcour;
+
+  for (i = 1; i <= lgelcour; i++)
+  {
+    indtel++;
+    (*ptel)[indtel] = elcour[i];
+  }
+
+}
+
+
+void EXTR_ELEM(int N,nom_elem &EL,int &L)
+{
+  int I;
+
+  L = 0;
+  I = tadel[N].adr - 1;
+  while (L < tadel[N].lg) {
+    L++;
+    EL[L]=(*ptel)[I+L];
+  }
+}
+
+bool PREF_ELEM(nom_elem elem1,nom_elem elem2,int l1,int l2)
+{
+     int i,j;
+     i=1;
+     j=1;
+     while ((i<l1)&&(elem1[i]==elem2[j]))
+     {
+           i++;
+           j++;
+     }
+     return (elem1[i]==elem2[j]);
+}
+
+void TEST_PREF(int n)
+{
+     nom_elem el;
+     int i,l;
+     bool trouve;
+
+     trouve=false;
+     EXTR_ELEM(n,el,l);
+     if (tadel[n].lg<lgelcour)
+        trouve=PREF_ELEM(el,elcour,l,lgelcour);
+     if (trouve)
+     {
+        //with tadel[n] do
+        res<<"PREFIXE : Mettre le mot :";
+        for (i=1;i<=lgelcour;i++)
+            res<<elcour[i];
+        res<<"  avant le mot  :";
+        for (i=tadel[n].adr;i<=(tadel[n].adr+tadel[n].lg-1);i++)
+            res<<(*ptel)[i];
+        res<<endl;
+     }
+}
+
+bool SUFF_ELEM(nom_elem elem1,nom_elem elem2,int l1,int l2)
+{
+     int i,j;
+     i=l1;
+     j=l2;
+     if (i != 0)
+     {
+        while ((i>1)&&(j>1)&&(elem1[i]==elem2[j]))
+        {
+              i--;
+              j--;
+        }
+        return ((elem1[i]==elem2[j])&&(j>=i));
+     }
+     else
+         return false;
+}
+
+void TEST_SUFF(int n)
+{
+     nom_elem el;
+     int i,l;
+     bool trouve;
+
+     trouve=false;
+     EXTR_ELEM(n,el,l);
+     if (tadel[n].lg<lgelcour)
+        trouve=SUFF_ELEM(el,elcour,l,lgelcour);
+     if (trouve)
+     {
+        //with tadel[n] do
+        res<<"SUFFIXE : Mettre le mot  :";
+        for (i=1;i<=lgelcour;i++)
+            res<<elcour[i];
+        res<<"  avant le mot  :";
+        for (i=(tadel[n].adr);i<=((tadel[n].adr)+(tadel[n].lg)-1);i++)
+            res<<(*ptel)[i];
+        res<<endl;
+     }
+}
+
+void AJOUT_ENS()
+{
+ list_appart* p;
+
+  if (tens[numidcour] == NULL)
+  {
+
+      tens[numidcour] =  new list_appart;
+      p = tens[numidcour];
+  }
+  else
+  {
+	  p = tens[numidcour];
+    while (p->suivant != NULL)
+	{
+          p =p->suivant;
+        }
+	  p->suivant = new list_appart;
+      p = p->suivant;
+  }
+  p->num = numelcour;
+  p->suivant = NULL;
+}
+
+
+void EXTR_IDENT(int N, nom_ident &ID,int &L)
+{
+	int I;
+
+  L = 0;
+  I = tadid[N].adr - 1;
+  while ( L < tadid[N].lg)
+  {
+	  L++;
+      ID[L] = tid[I + L];
+  }
+}
+
+
+bool EGAL_ELEM(nom_elem E1,nom_elem E2,int L)
+{
+  int I;
+
+  I = 1;
+  while ((I<L)&&(E1[I]==E2[I]))
+    I++;
+  return (E1[I]==E2[I]);
+}
+
+
+void NUMELEM_EXTR(nom_elem elcour, int LONG, bool &TROUVE, int &N)
+
+{
+  nom_elem EL, ELEM;
+  int L;
+
+  N = 0;
+  TROUVE = false;
+  for(int i=0;i<=max_lg_elem;i++)
+   ELEM[i]=elcour[i];
+  while ((N<=indtadel)&&(!TROUVE))
+  {
+	  N++;
+      if (tadel[N].lg == LONG)
+	  {
+		  EXTR_ELEM(N, EL, L);
+          TROUVE = EGAL_ELEM(ELEM, EL, L);
+	  }
+  }
+}
+
+bool EGAL_IDENT (nom_ident ID1,nom_ident ID2,int L)
+{
+	int I;
+
+    I=1;
+    while ((I<L)&&(ID1[I]==ID2[I]))
+    	I++;
+    return ((ID1[I])==(ID2[I]));
+}
+
+void NUMIDENT_EXTR(nom_ident IDENT,int LONG,bool &TROUVE,int &N)
+{
+	nom_ident ID;
+    int L;
+
+    N=-1;
+    TROUVE=false;
+    while ((N<=indtadid)&&(!TROUVE))
+    {
+    	N++;
+        if (tadid[N].lg==LONG)
+        {
+        	EXTR_IDENT(N,ID,L);
+            TROUVE=EGAL_IDENT(IDENT,ID,L);
+        }
+    }
+}
+
+void SAU_IDENT()
+{
+  int I;
+  fens<<indtid<<'\n';
+  for (I = 1; I <= indtid; I++)
+       fens<<tid[I];
+  fens<<'\n';
+  fens<<indtadid<<'\n';
+  for (I = 1; I <= indtadid; I++)
+	  fens<<tadid[I].adr<<" "<<tadid[I].lg<<'\n';
+}
+
+void SAU_ELEM()
+{
+  int I;
+
+   fens<<indtel<<'\n';
+  for (I = 1; I <= indtel; I++)
+      fens<<(*ptel)[I];
+  fens<<'\n';
+  fens<<indtadel<<'\n';
+  for (I = 1; I <= indtadel; I++)
+   fens<<tadel[I].adr<<" "<<tadel[I].lg<<'\n';
+}
+
+void SAU_ENS()
+{
+  int I;
+  list_appart   *P;
+  fens<<indtadid<<'\n';
+  for (I = 0; I <= indtadid; I++) {
+    if (tens[I] == NULL)
+      	 fens<<'\n';
+    else {
+      P = tens[I];
+      while (P->suivant != NULL)
+	  {
+		  fens<<P->num<<" ";
+	      P = P->suivant;
+      }
+      fens<<P->num<<'\n';
+    }
+  }
+}
+
+void LIRE_ENSEMBLE()
+{
+  bool TROUVE;
+
+  LIRE_IDENT();
+
+  if (lgidcour + indtid > max_tab_ident) {
+    fres<< "!! erreur : probleme de stockage dans lire_ensemble"<<'\n';
+    fres<< "Plus de place pour stocker l'ident. num."<<(numidcour + 1)<<'\n';
+    fres<< "Veuiller augmenter la valeur de la cste max_tab_ident s.v.p."<<'\n';
+    fres<< "...et recompiler..."<<'\n';
+    fres<< "** FIN ANORMALE **"<<'\n';
+    fin_anormale = true;
+    throw 1;
+  }
+  if (numidcour == max_num_ident)
+  {
+	  fres<<"!! erreur : probleme de stockage dans lire_ensemble"<<'\n';
+      fres<< "Trop d'ensembles"<<'\n';
+      fres<<"Veuiller augmenter la valeur de la cste max_num_ident s.v.p."<<'\n';
+      fres<< "...et recompiler..."<<'\n';
+      fres<< "** FIN ANORMALE **"<<'\n';
+    fin_anormale = true;
+    throw 1;
+  }
+
+  AJ_IDENT();
+  while (car != '(')
+    car = gram.get();
+    car = gram.get();
+	LIRE_BLANC();
+  while (car != ')')
+  {
+	  LIRE_ELEM();
+
+      if (lgelcour + indtel > max_tab_elem)
+	  {
+		  fres<< "!! erreur : probleme de stockage dans lire_ensemble"<<'\n';
+          fres<<"Plus de place pour stocker les elem. de l'ens. num."<<(numidcour + 1)<<'\n';
+          fres<<"Veuiller augmenter la valeur de la cste max_tab_elem s.v.p."<<'\n';
+          fres<< "...et recompiler..."<<'\n';
+          fres<< "** FIN ANORMALE **"<<'\n';
+        fin_anormale = true;
+        throw 1;
+    }
+    if (numelcour == max_num_elem)
+	{
+		fres<< "!! erreur : probleme de stockage dans lire_ensemble"<<'\n';
+        fres<< "Trop d'elements distincts (ens. num.)"<<(numidcour + 1)<<'\n';
+        fres<<"Veuiller augmenter la valeur de la cste MAX_NUM_ELEM s.v.p."<<'\n';
+        fres<< "...et recompiler..."<<'\n';
+        fres<< "** FIN ANORMALE **"<<'\n';
+      fin_anormale = true;
+      throw 1;
+    }
+
+    NUMELEM_EXTR(elcour, lgelcour, TROUVE, numelcour);
+    if (!TROUVE)
+      AJ_ELEM();
+
+    AJOUT_ENS();
+
+    LIRE_BLANC();
+    if (car == '¡')
+	{
+		car = gram.get();
+      LIRE_BLANC();
+    }
+  }
+  car = gram.get();
+  if (car == '\n')
+    car = ' ';
+}  /* Fin LIRE_ENSEMBLE */
+
+int to_int(char c)
+	{int i=c;
+	 if(i<0)
+		{i=c&(128-1);
+		 i=i+128;
+		}
+	 return i;
+	}
+
+
+void STRUCT_ENS()
+{
+  int i;
+
+  indtadel = 0;
+  ptel= (tab_elem*)new tab_elem;
+  for(i=0;i<max_tab_elem;i++)
+      (*ptel)[i]=' ';
+  indtel = 0;
+  indtid = 0;
+  indtadid = -1;
+  for (i = 0; i <= max_num_ident; i++)
+    tens[i] = NULL;
+  car = gram.get();
+  LIRE_BLANC();
+  while (car != '$') {
+    if (car == '"' )
+      LIRE_ENSEMBLE();
+    else
+      LIRE_COMMENTAIRE();
+
+    LIRE_BLANC();
+
+  }
+
+   while (car != '\n')
+  {
+      car = gram.get();
+  }
+     gram.unget();
+}
+
+void Maxim(int i,int j,int &m)
+{
+  m = i;
+  if (i < j)
+    m = j;
+  else
+    m = i;
+}
+
+void IMP_REGLE(ofstream &f)
+
+{
+  int i, j;
+  f<< "regle num. "<< numregle<<'\n';
+  f<< "cxt_g:"<< regle.l_g<<'\n';
+  for (i = 1; i <= regle.l_g; i++)
+	  f<<regle.cxt_g[i];
+   f<<'\n';
+  f<<"ch_d:"<<regle.l_d<<" l_ct:"<<regle.l_ct<<'\n';
+  for (i=1 ;i<= regle.l_d;i++)
+	  f<<regle.ch_d[i];
+          f<<'\n';
+  f<< "cat:"<<regle.nb_cat_reg<<'\n';
+  for (i=1;i<=regle.nb_cat_reg;i++)
+  {
+	  for (j=1;j<=regle.ens_cat_reg[i].lg_cat;j++)
+		  f<<regle.ens_cat_reg[i].catg[j];
+	  if (i!=regle.nb_cat_reg)
+		  f<<",";
+  }
+ // f<<'\n';
+  if (regle.poly_ph)
+	  f<<"poly_phonemes"<<'\n';
+  f<<"pho:"<<regle.l_ph<<'\n';
+  for (i=1; i<= regle.l_ph;i++)
+	  f<<regle.pho[i];
+          f<<'\n';
+
+}
+
+void CODE_NUMIDENT(int N,char &C1,char &C2)
+{
+
+   C1=(char)(floor(N/10));
+   C2=(char)(floor(fmod(N,10)));
+
+
+}
+
+void TEST_REG_SUFF()
+{
+     bool trouve;
+     int i,j,k;
+
+     trouve=false;
+     for (i=2;i<=imc;i++)
+         for (j=2;j<=(i-1);j++)
+         {
+             trouve=SUFF_ELEM(lmc[i].mcxt,lmc[j].mcxt,lmc[i].lon_g,lmc[j].lon_g);
+             if (trouve)
+             {
+                IMP_REGLE(res);
+                res<<" SUFFIXE_REGLE : Mettre le mot :";
+                for (k=1;k<=lmc[i].lon_g;k++)
+                    res<<lmc[i].mcxt[k];
+                res<<" avant le mot :";
+                for (k=1;k<=lmc[j].lon_g;k++)
+                    res<<lmc[j].mcxt[k];
+                res<<endl;
+             }
+         }
+         for (i=1;i<=imc;i++)
+             for (j=1;j<=lmc[i].lon_g;j++)
+                 lmc[i].mcxt[j]=' ';
+}
+
+void TEST_REG_PREF()
+{
+     bool trouve;
+     int i,j,k;
+
+     trouve=false;
+     for (i=2;i<=imc;i++)
+         for (j=i+1;j<=imc;j++)
+         {
+             trouve=PREF_ELEM(lmc[i].mcxt,lmc[j].mcxt,lmc[i].lon_g,lmc[j].lon_g);
+             if (trouve)
+             {
+                IMP_REGLE(res);
+                res<<" PREFIXE_REGLE : Mettre le mot :";
+                for (k=1;k<=lmc[i].lon_g;k++)
+                    res<<lmc[i].mcxt[k];
+                res<<" apres le mot :";
+                for (k=1;k<=lmc[j].lon_g;k++)
+                    res<<lmc[j].mcxt[k];
+                res<<endl;
+             }
+         }
+         for (i=1;i<=imc;i++)
+             for (j=1;j<=lmc[i].lon_g;j++)
+                 lmc[i].mcxt[j]=' ';
+}
+
+void LIRE_CONTEXT(bool droite,context &CXT,int &L)
+{
+	int i,j,k;
+ 	bool TROUVE;
+	char apos;
+	imc=1;
+    car = gram.get();
+	LIRE_BLANC();
+	while (car !=')')
+	{
+		if (car == '"')
+		{
+			apos=car;
+			L++;
+			if (droite)
+			  VERIF_LG(L,max_lg_ch_d,3);
+			else
+			  VERIF_LG(L,max_lg_cxt_g,3);
+			CXT[L]=car;
+			LIRE_IDENT();
+			NUMIDENT_EXTR(idcour,lgidcour,TROUVE,numidcour);
+			if (TROUVE)
+				CODE_NUMIDENT(numidcour,CXT[L+1],CXT[L+2]);
+			else
+			{
+               fres<< "!!erreur:proleme dans lire_contexte"<<'\n';
+			   fres<< "regle num."<<numregle<<":identificateur non declare"<<'\n';
+   	           fres<< "** FIN ANORMALE **"<<'\n';
+			   fin_anormale = true;
+			   throw 1;
+			}
+			L=L+3;
+			if (droite)
+				VERIF_LG(L,max_lg_ch_d,3);
+			else
+				VERIF_LG(L,max_lg_cxt_g,3);
+			CXT[L]='"';
+			LIRE_BLANC();
+                        if ((car!='¡')&&(car!=')')&&(car!='+'))
+			{
+                cout<<"\n**ERREUR**";
+				cout<<"\nRegle num."<<numregle<<":II manque un operteur ou une paranthese";
+				cout<<"\nentre le nom d'un lexique et le caractere suivant";
+				cout<<"\n**FIN ANORMALE**";
+				throw 1;
+			}
+		}
+		else
+		{
+			i=L;
+			while (((car!='¡')&&(car!=')')&&(car!='+')&&(car!=' ')&&(car!='"'))) //note the space to verifie
+			{
+				L=L+1;
+				if (droite)
+					VERIF_LG(L,max_lg_ch_d,3);
+				else
+					VERIF_LG(L,max_lg_cxt_g,3);
+				CXT[L]=car;
+				if (car=='/')
+				{
+					L=L+1;
+					if (droite)
+						VERIF_LG(L,max_lg_ch_d,3);
+					else
+						VERIF_LG(L,max_lg_cxt_g,3);
+					CXT[L]=gram.get();
+					L=L+1;
+					if (droite)
+						VERIF_LG(L,max_lg_ch_d,3);
+					else
+						VERIF_LG(L,max_lg_cxt_g,3);
+					CXT[L]='/';
+				}
+				car=gram.get();
+			}
+			if (car=='"')
+			{
+				printf("\n**ERREUR*");
+				printf("\nRegle num.",numregle,":II manque un operteur entre le nom d'un lexique et le caractere suivant");
+   				printf("\n**FIN ANORMALE**");
+				throw 1;
+			}
+			k=0;
+			for (j=i+1;j<=L;j++);
+			{
+				k=k+1;
+				lmc[imc].mcxt[j-i]=CXT[j];
+			}
+			lmc[imc].lon_g=k;
+			imc=imc+1;
+		}
+		LIRE_BLANC();
+		if (car!='¡')
+		{
+                        if (droite)
+                           TEST_REG_PREF();
+			else
+                           TEST_REG_SUFF();
+			imc=1;
+		}
+		if (car!=')')
+		{
+			L=L+1;
+			if (droite)
+				VERIF_LG(L,max_lg_ch_d,3);
+			else
+				VERIF_LG(L,max_lg_cxt_g,3);
+			CXT[L]=car;
+			car = gram.get();
+			LIRE_BLANC();
+		}
+	}
+		car = gram.get();
+
+
+}
+
+void LIRE_CT()
+{
+	car = gram.get();
+	while (car!='+')
+	{
+		if (car == '/')
+			car = gram.get();
+		regle.l_ct=regle.l_ct+1;
+		VERIF_LG(regle.l_ct,max_lg_ch_d,4);
+		regle.l_d=regle.l_d+1;
+		regle.ch_d[regle.l_ct]=car;
+		car = gram.get();
+	}
+	car = gram.get();
+	VERIF_CLASSE();
+}
+
+
+void init_ens_cat()
+{
+	int i,j;
+	// wih regle do
+	for (i=1 ; i<=nb_max_cat ; i++)
+	{
+		for (j=1 ; j<=max_lg_cat ; j++)
+			regle.ens_cat_reg[i].catg[j]=' ';
+			regle.ens_cat_reg[i].lg_cat=0;
+	}
+
+}
+
+void LIRE_CAT()
+{
+
+	int k;
+//with regle do
+	init_ens_cat();
+	car = gram.get();
+	LIRE_BLANC();
+	while (car != '}')
+	{
+		regle.nb_cat_reg = regle.nb_cat_reg+1;
+		k=1;
+		while ((car != '¡')&&((car !='}')&&(car != ' ')))
+		{
+			regle.ens_cat_reg[regle.nb_cat_reg].catg[k]=car;
+			k=k+1;
+			car = gram.get();
+		}
+		regle.ens_cat_reg[regle.nb_cat_reg].lg_cat=k-1;
+		if (car == ' ')
+			LIRE_BLANC();
+		if (car == '¡')
+		{
+			car = gram.get();
+			LIRE_BLANC();
+		}
+		else
+                   if (car!='}')
+                     {
+			ftrace<<"La categorie de la regle numero"<<regle.num;
+			ftrace<<"est mal ecrite";
+		      }
+          }
+}
+
+
+void LIRE_PHO()
+{
+	car = gram.get();
+	while (car != ']')
+	{
+		if (car == '/')
+			car = gram.get();
+		if (car != ']')
+		{
+			if (car == '|')
+				regle.poly_ph=true;
+			regle.l_ph = regle.l_ph+1;
+			VERIF_LG(regle.l_ph,max_lg_ph,5);
+			regle.pho[regle.l_ph]=car;
+                        car = gram.get();
+		}
+
+	}
+       car = gram.get();
+}
+
+void LIRE_REGLE()
+{
+	context  CXT;
+	category catg;
+	int i;
+// wih regle do
+	regle.l_g = 0;
+	regle.l_d=0;
+	regle.l_ct=0;
+	regle.nb_cat_reg=0;
+	regle.l_ph=0;
+	regle.num=numregle;
+	regle.poly_ph=false;
+	// with regle do
+	if (car == '(')
+		LIRE_CONTEXT(false,CXT,regle.l_g);
+	for (i=1;i<=regle.l_g;i++)
+		regle.cxt_g[i]=CXT[i];
+	LIRE_BLANC();
+	LIRE_CT();
+	LIRE_BLANC();
+	if (car== '(')
+	//WITH regle DO
+	LIRE_CONTEXT(true,CXT,regle.l_d);
+	for (i=(regle.l_ct+1);i<=(regle.l_d);i++)
+	    regle.ch_d[i]=CXT[i];
+	LIRE_BLANC();
+	if (car == '{')
+		LIRE_CAT();
+	while (car != '[')
+        car = gram.get();
+	LIRE_PHO();
+	regle.inclue=true;
+	
+}
+
+
+void STRUCT_REG()
+{
+	char c;
+	struc_list* p;
+	int i;
+	struc_regle regle_nulle;
+	//with regle_nulle do
+	regle_nulle.l_g=0;
+	regle_nulle.l_ct=0;
+        for (int a=0;a<=nb_max_cat;a++)
+           regle_nulle.ens_cat_reg[a].lg_cat=0;
+	regle_nulle.nb_cat_reg=0;
+	regle_nulle.l_ph=0;
+	regle_nulle.num=0;
+	regle_nulle.inclue=false;
+	regle_nulle.poly_ph=false;
+	regle_nulle.sentinelle=0;
+	regle_nulle.l_d=0;
+	nbregle=0;
+	numregle=0;
+	for (i=0;i<=255;i++)
+		alphabet[i]=NULL;
+    car = gram.get();
+	LIRE_BLANC();
+	while (!gram.eof())
+	{
+		if ((car=='(')||(car=='+'))
+		{
+			numregle=numregle+1;
+			LIRE_REGLE();
+			if (trace)
+				IMP_REGLE(ftrace);
+			c=regle.ch_d[1];
+			if (alphabet[to_int(c)]==NULL)
+			{
+            	 alphabet[to_int(c)]= new struc_list;
+				p=alphabet[to_int(c)];
+			}
+			else
+			{
+				p=alphabet[to_int(c)];
+				while (p->suivant !=NULL)
+					p=p->suivant;
+                p->suivant= new struc_list;
+				p=p->suivant;
+			}
+			p->element=regle;
+			p->suivant=NULL;
+		}
+		else 
+			LIRE_COMMENTAIRE();
+
+		LIRE_BLANC();
+	}
+	for (i=0;i<=255;i++)
+	{
+		p=alphabet[i];
+		tab_long[i]=0;
+		while (p != NULL )
+		{
+			tab_long[i]=tab_long[i]+1;
+			p->element.sentinelle=1;
+                        int a;
+                        top<<p->element.l_g;
+                        top<<endl;
+                        for (a=1;a<=p->element.l_g;a++)
+                           top<<p->element.cxt_g[a];
+                        top<<endl;
+                        top<<p->element.l_ct;
+                        top<<endl;
+                        top<<p->element.l_d;
+                        top<<endl;
+                        for (a=1;a<=p->element.l_d;a++)
+                           top<<p->element.ch_d[a];
+                        top<<endl;
+                        top<<p->element.nb_cat_reg;
+                        top<<endl;
+                        bool fl=true;
+                        for (a=1;a<=p->element.nb_cat_reg;a++)
+                        {
+                           fl=false;
+                           top<<p->element.ens_cat_reg[a].lg_cat;
+                           top<<endl;
+                           for (int b=1;b<=p->element.ens_cat_reg[a].lg_cat;b++)
+                              top<<p->element.ens_cat_reg[a].catg[b];
+                           top<<endl;
+                        }
+                        if (fl)
+                           top<<endl;
+                        top<<p->element.l_ph;
+                        top<<endl;
+                        for (a=1;a<=p->element.l_ph;a++)
+                           top<<p->element.pho[a];
+                        top<<endl;
+                        top<<p->element.num;
+                        top<<endl;
+                        top<<p->element.inclue;
+                        top<<endl;
+                        top<<p->element.poly_ph;
+                        top<<endl;
+                        top<<p->element.sentinelle;
+			p=p->suivant;
+                        top<<endl;
+			nbregle=nbregle+1;
+		}
+		tab_long[i]=tab_long[i]+1;
+		nbregle=nbregle+1;
+                        int a;
+                        top<<regle_nulle.l_g;
+                        top<<endl;
+                        for (a=1;a<=regle_nulle.l_g;a++)
+                           top<<regle_nulle.cxt_g[a];
+                        top<<endl;
+                        top<<regle_nulle.l_ct;
+                        top<<endl;
+                        top<<regle_nulle.l_d;
+                        top<<endl;
+                        for (a=1;a<=regle_nulle.l_d;a++)
+                           top<<regle_nulle.ch_d[a];
+                        top<<endl;
+                        top<<regle_nulle.nb_cat_reg;
+                        top<<endl;
+                        bool fl=true;
+                        for (a=1;a<=regle_nulle.nb_cat_reg;a++)
+                        {
+                           fl=false;
+                           top<<regle_nulle.ens_cat_reg[a].lg_cat;
+                           top<<endl;
+                           for (int b=1;b<=regle_nulle.ens_cat_reg[a].lg_cat;b++)
+                              top<<regle_nulle.ens_cat_reg[a].catg[b];
+                           top<<endl;
+                        }
+                        if (fl)
+                           top<<endl;
+                        top<<regle_nulle.l_ph;
+                        top<<endl;
+                        for (a=1;a<=regle_nulle.l_ph;a++)
+                           top<<regle_nulle.pho[a];
+                        top<<endl;
+                        top<<regle_nulle.num;
+                        top<<endl;
+                        top<<regle_nulle.inclue;
+                        top<<endl;
+                        top<<regle_nulle.poly_ph;
+                        top<<endl;
+                        top<<regle_nulle.sentinelle;
+                        top<<endl;
+	}
+	tab_dep[0]=0;
+	ftab<<tab_dep[0]<<' ';
+	for (i=1;i<=255;i++)
+	{
+		tab_dep[i]=tab_dep[i-1]+tab_long[i-1];
+		ftab<<tab_dep[i]<<' ';
+	}
+	ftab<<nbregle;
+
+
+
+}
+
+void main_struct()
+{
+// FOR THE PROGRAM
+     try
+     {
+	fin_anormale=false;
+	entree_ecran=true;
+    ofstream fres("fichier_res_struct.res");
+    if (entree_ecran)
+	{
+           if (chemin_gram[0]=='¿')
+		{
+			cout<<"Les suffixes sont rajoutes par le programme au prefixe XXXXXX:"<<'\n';
+			cout<<" XXXXXX: est le fichier texte contenant la grammaire"<<'\n';
+			cout<<"         a structurer"<<'\n';
+			cout<<" XXXXXX.Ens:sera le fichier de sauvegarde des ensembles"<<'\n';
+			cout<<" XXXXXX.REG:sera le fichier de sauvegarde du tableau des regles"<<'\n';
+			cout<<" XXXXXX.TAB:sera le fichier de sauvegarde du tableau des indices des regles"<<'\n';
+			cout<<" XXXXXX.TRC:sera l'eventuel fichier contenant la trace"<<'\n';
+			cout<<"         de realisation des regles"<<'\n';
+			cout<<'\n';
+			cout<<"Nom du prefixe des fichiers:";
+			gets(chemin_gram);
+                        cout<<endl;
+		}
+ 	//	cout<<"Voulez la trace de realisation des regles (o/n):";
+	 //	cin>>trace_car;
+          //       cout<<endl;
+          trace_car= 'o';
+		bool_majmin=false;
+	}
+	else
+	{
+        ifstream fcorres("fichier_transfert.txt");
+		if (fcorres.eof())
+		{
+			fres<<"!!erreur:ne trouve pas fichier_transfert!!"<<'\n';
+			cout<<"!!erreur:ne trouve pas fichier_transfert!!"<<'\n';
+			throw 1;
+		}
+		else
+		{
+                        fcorres>>chemin_gram;
+                        fcorres>>trace_car;
+			fcorres.close();
+		}
+	}
+        gram.open("gram.txt",ios::in);
+		trace=(trace_car=='o');
+
+                res.open("gram.chgt",ios::out);//ofstream res(s.data());
+		res<<'\n';
+		res<<'\n';
+		res<<"---------------------------------------------"<<'\n';
+		res<<"Ce fichier contient les mots qui doivent etre deplacer dans le fichier de la grammaire       ";
+		res<<"                                             "<<long_nompref;
+		res<<'\n';
+		res<<"-----------------------------------------------";
+		res<<'\n\n\n\n';
+		suff=".ens";
+                string s1=string( chemin_gram)+string(suff);
+                fens.open("gram.ens",ios::out);
+		STRUCT_ENS();
+		fres<<"-->"<<(indtadid+1)<<"ensemble(s) structur(s)"<<'\n';
+		suff=".rg";
+                  string s2=string( chemin_gram)+string(suff);
+                top.open("gram.rg",ios::out);
+		suff=".tab";
+                 string s3=string( chemin_gram)+string(suff);
+                ftab.open("gram.tab",ios::out);
+ 		if (trace)
+		{
+		suff=".trc";
+                 string s4=string( chemin_gram)+string(suff);
+                 ftrace.open("gram.trc",ios::out);
+		}
+		STRUCT_REG();
+		top.close();
+		ftab.close();
+		res.close();
+		SAU_IDENT();
+		SAU_ELEM();
+		SAU_ENS();
+		fens.close();
+		if (trace)
+			ftrace.close();
+		fres<<"-->"<<numregle<<"regle(s) structure(s)\n";
+		if (numregle > max_nb_regle)
+		{
+			fres<<"!!erreur:Trop de regles:les statistiques ne marcheront pas^la"<<'\n';
+			fres<<"transcr.,^moins d'augmenter la valeur de MAX_NB_REGLE"<<'\n';
+			fres<<"et de recompiler..."<<'\n';
+		}
+		gram.close();
+		fres<<"*******************************************\n";
+       } //try
+           catch (int i)
+                {
+                    if (i==1)
+                    {
+                        fres.close();
+        		if (fin_anormale)
+	        	    cout<<"FIN ANORMALE:Veuillez ouvrir le fichier fichier_res_struct.res"<<'\n';
+		        if (entree_ecran)
+                	   {
+			        cout<<"*** Appuiez sur la touche retour pour terminer***"<<'\n';
+                                cin>>i;
+                            }
+
+                       }
+                   }
+                
+
+
+}
+
+
+// end.
+
+
+
+

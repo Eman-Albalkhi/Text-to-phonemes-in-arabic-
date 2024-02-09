@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<!-- C++Builder XML Project -->
+<PROJECT>
+  <MACROS>
+    <VERSION value="BCB.05.03"/>
+    <PROJECT value="Toph.exe"/>
+    <OBJFILES value="Toph.obj ..\src\main.obj ..\src\cherch.obj ..\src\extrai.obj 
+      ..\src\gerbou.obj ..\src\imprim.obj ..\src\init.obj ..\src\lire.obj 
+      ..\src\trace.obj ..\src\trans.obj ..\src\transc.obj ..\src\var_trans.obj"/>
+    <RESFILES value=""/>
+    <IDLFILES value=""/>
+    <IDLGENFILES value=""/>
+    <DEFFILE value=""/>
+    <RESDEPEN value="$(RESFILES)"/>
+    <LIBFILES value=""/>
+    <LIBRARIES value=""/>
+    <SPARELIBS value=""/>
+    <PACKAGES value="vcl50.bpi vclx50.bpi bcbsmp50.bpi qrpt50.bpi vcldb50.bpi vclbde50.bpi 
+      ibsmp50.bpi vcldbx50.bpi teeui50.bpi teedb50.bpi tee50.bpi nmfast50.bpi 
+      dclocx50.bpi"/>
+    <PATHCPP value=".;..\src"/>
+    <PATHPAS value=".;"/>
+    <PATHRC value=".;"/>
+    <PATHASM value=".;"/>
+    <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
+    <RELEASELIBPATH value="$(BCB)\lib\release"/>
+    <LINKER value="ilink32"/>
+    <USERDEFINES value=""/>
+    <SYSDEFINES value="_NO_VCL;_VIS_NOLIB;USEPACKAGES"/>
+    <MAINSOURCE value="Toph.cpp"/>
+    <INCLUDEPATH value="..\src;..\inc;$(BCB)\include;..\..\..\CBuilder4\Include\Vcl;$(BCB)\include\cvl"/>
+    <LIBPATH value="..\src;$(BCB)\lib;$(BCB)\lib\obj"/>
+    <WARNINGS value=""/>
+    <WARNOPTSTR value=""/>
+  </MACROS>
+  <OPTIONS>
+    <IDLCFLAGS value="-src_suffix cpp -I..\src -I..\inc -I$(BCB)\include 
+      -I..\..\..\CBuilder4\Include\Vcl -I$(BCB)\include\cvl -boa"/>
+    <CFLAG1 value="-Od -w -Tkh30000 -X- -r- -a8 -b -k -y -v -vi- -c -tWM -tWC"/>
+    <PFLAGS value="-$YD -$W -$O- -v -JPHN -M"/>
+    <RFLAGS value=""/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="-D&quot;&quot; -ap -Tpe -x -Gn -v"/>
+  </OPTIONS>
+  <LINKER>
+    <ALLOBJ value="c0x32.obj $(PACKAGES) $(OBJFILES)"/>
+    <ALLRES value="$(RESFILES)"/>
+    <ALLLIB value="$(LIBFILES) import32.lib cw32mt.lib"/>
+  </LINKER>
+  <IDEOPTIONS>
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1025
+CodePage=1256
+
+[Version Info Keys]
+CompanyName=
+FileDescription=Executable (Console)
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=3
+Item0=..\src;..\inc;$(BCB)\include;..\..\..\CBuilder4\Include\Vcl;$(BCB)\include\cvl
+Item1=..\src;..\inc;$(BCB)\include;E:\CBuilder4\Include\Vcl
+Item2=..\inc;$(BCB)\include
+
+[HistoryLists\hlLibraryPath]
+Count=2
+Item0=..\src;$(BCB)\lib;$(BCB)\lib\obj
+Item1=..\src;$(BCB)\lib
+
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(BCB)\source\vcl
+
+[Debugging]
+DebugSourceDirs=$(BCB)\source\vcl
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+ShowInfoMsgs=0
+LinkDebugVcl=1
+LinkCGLIB=0
+
+[CORBA]
+AddServerUnit=1
+AddClientUnit=1
+PrecompiledHeaders=1
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
+  </IDEOPTIONS>
+</PROJECT>

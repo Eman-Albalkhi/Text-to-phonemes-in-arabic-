@@ -1,0 +1,18 @@
+!-- transcr. du texte:  --!
+!-- grammaire: --!
+!-- trace des regles utilisees --!
+
+wa
+hw
+
++æ+(ó¡ö¡Ç)=[w]
++ó+=[a]
++ +=[]
+
++å+=[h]
++õ+(æ)=[]
++æ+(ó¡ö¡Ç)=[w]
++ó+(""+"")=[]
++ +=[]
+
+
